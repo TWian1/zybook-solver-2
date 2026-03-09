@@ -1,36 +1,34 @@
 /// <reference path="../node_modules/chrome-types/index.d.ts" />
 
 function isZybook(url: string): boolean {
-  console.log(url);
   return url?.includes("learn.zybooks.com/zybook");
 }
 
-function updateIcon(tabId: number, url: string): void {
-  const isGray = !isZybook(url);
+function updateIcon(url?: string): void {
+  const isGray = url && !isZybook(url);
 
   chrome.action.setIcon({
-    tabId: tabId,
     path: isGray
       ? {
-          "16": "./assets/icon-gray-16.png",
-          "32": "./assets/icon-gray-32.png",
-          "48": "./assets/icon-gray-48.png",
-          "128": "./assets/icon-gray-128.png"
+          "16": "../assets/icon-gray-16.png",
+          "32": "../assets/icon-gray-32.png",
+          "48": "../assets/icon-gray-48.png",
+          "128": "../assets/icon-gray-128.png"
         }
       : {
-          "16": "./assets/icon-16.png",
-          "32": "./assets/icon-32.png",
-          "48": "./assets/icon-48.png",
-          "128": "./assets/icon-128.png"
+          "16": "../assets/icon-16.png",
+          "32": "../assets/icon-32.png",
+          "48": "../assets/icon-48.png",
+          "128": "../assets/icon-128.png"
         }
   });
 }
 
 chrome.tabs.onActivated.addListener(async (activeInfo) => {
   const tab = await chrome.tabs.get(activeInfo.tabId);
-  updateIcon(tab.id!, tab.url!);
+  updateIcon(tab.url);
 });
 
-chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-  if (changeInfo.status === "complete") updateIcon(tabId, tab.url!);
+chrome.tabs.onUpdated.addListener((_tabId, changeInfo, tab) => {
+  if (changeInfo.status === "complete") updateIcon(tab.url);
 });

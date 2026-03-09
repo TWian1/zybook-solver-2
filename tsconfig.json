@@ -5,8 +5,10 @@
     "lib": ["ESNext", "DOM"],
     "moduleResolution": "bundler",
     "rootDir": "src",
+    "outDir": "out",
     "sourceMap": true,
     "skipLibCheck": true,
-    "strict": true
+    "strict": true,
+    "importsNotUsedAsValues": "remove"
   }
 }

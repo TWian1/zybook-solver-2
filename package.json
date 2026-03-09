@@ -2,15 +2,15 @@
   "name": "zybook-solver",
   "version": "1.0.0",
   "scripts": {
-    "build": "tsc -p ./",
-    "bundle": "rollup -f iife -i src/scripts/index.js -o src/build.js -m src/scripts/index.js.map",
-    "dev": "nodemon --watch src/popup/popup.ts --watch src/scripts/handlers.ts --watch src/scripts/utils.ts --watch src/scripts/index.ts --watch src/background.ts --exec 'npm run build && npm run bundle'"
+    "compile": "tsc -p ./",
+    "bundle": "rollup -f iife -i out/scripts/index.js -o out/build.js -m out/scripts/index.js.map -n build",
+    "build": "npm run compile && npm run bundle",
+    "dev": "nodemon --watch src/popup/popup.ts --watch src/scripts/handlers.ts --watch src/scripts/utils.ts --watch src/scripts/index.ts --watch src/background.ts --exec 'npm run build'"
   },
   "devDependencies": {
     "chrome-types": "^0.1.416",
     "nodemon": "^3.1.13",
     "rollup": "^4.57.1",
-    "tsc": "^2.0.4",
     "typescript": "^5.9.3"
   }
 }

@@ -1,5 +1,10 @@
-export function delay(ms: number): Promise<void> {
-  return new Promise((executor: () => void) => setTimeout(executor, ms));
+/**
+ * @param ms - Number of milliseconds to delay.
+ * @param fn - Optional function to execute BEFORE the delay.
+ */
+export function delay(ms: number, fn?: () => void): Promise<void> {
+  if (fn) fn();
+  return new Promise((executor: () => void) => setTimeout(() => executor(), ms));
 }
 
 export function simulateTyping(input: HTMLInputElement, text: string): void {
@@ -27,18 +32,14 @@ export function simulateTyping(input: HTMLInputElement, text: string): void {
 export function findNode(children: NodeListOf<ChildNode>, check: (node: Element) => boolean): Element | undefined;
 export function findNode<T>(children: NodeListOf<ChildNode>, check: (node: Element) => boolean): T | undefined;
 export function findNode<T>(children: NodeListOf<ChildNode>, check: (node: Element) => boolean): T | Element | undefined {
-  let found: Element | T | undefined;
-  children.forEach((child) => {
-    if (found) return;
-    if (child.nodeType === Node.ELEMENT_NODE && check(child as Element)) return (found = child as T);
+  for (const child of Array.from(children)) {
+    if (child.nodeType === Node.ELEMENT_NODE && check(child as Element)) return child as T;
 
     if (child.childNodes.length) {
-      const foundInChild = findNode(child.childNodes, check);
-      if (foundInChild) return (found = foundInChild);
+      const found = findNode(child.childNodes, check);
+      if (found) return found;
     }
-  });
-
-  return found;
+  }
 }
 
 export function findAllNodes(children: NodeListOf<ChildNode>, check: (node: Element) => boolean, foundNodes?: Element[]): Element[];

@@ -1,17 +1,61 @@
 /// <reference path="../../node_modules/chrome-types/index.d.ts" />
+/// <reference path="../scripts/index.d.ts" />
+
+async function updateTasks(tab: chrome.tabs.Tab): Promise<Task[]> {
+  if (tab.id === undefined) return [];
+  const response: Task[] = await chrome.tabs.sendMessage(tab.id, { type: "getTasks" });
+
+  const tasks = /* html */ `<section class="list">
+    ${response
+      .map(
+        (task) => /* html */ `<div class="task">
+          <h3>${task.name}</h3>
+          ${task.isRunning ? /* html */ `<span class="loading"></span>` : ""}
+          ${task.isComplete ? /* html */ `<span class="success"><img src="../../assets/ui/checkmark-circle-outline.svg" draggable="false" /></span>` : ""}
+          ${task.isFailed ? /* html */ `<span class="failure"><img src="../../assets/ui/close-circle-outline.svg" draggable="false" /></span>` : ""}
+        </div>`
+      )
+      .join("")}
+  </section>`;
+
+  const list = document.querySelector(".list");
+  if (!list) document.body.insertAdjacentHTML("beforeend", tasks);
+  else list.outerHTML = tasks;
+
+  return response;
+}
 
 document.addEventListener("DOMContentLoaded", async () => {
   const [tab] = await chrome.tabs.query({ active: true, currentWindow: true });
   if (!tab.url!.includes("learn.zybooks.com/zybook")) return (document.body.innerHTML = /* html */ `<div>this isnt a zybook silly</div>`);
 
-  document.body.innerHTML = /* html */ `<button>click me</button>`;
+  try {
+    if (!tab.id) return;
+    await chrome.tabs.sendMessage(tab.id, { type: "clearTasks" });
+  } catch (error) {}
+
+  const [section, course] = tab.title!.split(/[|\-]/g).map((part) => part.trim());
+  document.body.innerHTML = /* html */ `<header>
+    <h1>${section ?? "Loading"}</h1>
+    <h2 class="course">${course ?? "Loading"}</h2>
+  </header>
+
+  <button class="solve">Solve!</button>`;
 
   const button: HTMLButtonElement = document.querySelector("button")!;
 
   button.addEventListener("click", async () => {
-    chrome.scripting.executeScript({
-      target: { tabId: tab.id! },
-      files: ["src/build.js"]
+    if (tab.id === undefined) return;
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      files: ["out/build.js"]
     });
+
+    updateTasks(tab);
+
+    const interval = setInterval(async () => {
+      const results = await updateTasks(tab);
+      if (results.every((task) => !task.isRunning)) clearInterval(interval);
+    }, 1000);
   });
 });
