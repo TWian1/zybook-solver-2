@@ -40,12 +40,29 @@ document.addEventListener("DOMContentLoaded", async () => {
     <h2 class="course">${course ?? "Loading"}</h2>
   </header>
 
-  <button class="solve">Solve!</button>`;
+  <button class="solve">Solve!</button>
+  <button class="copy">Copy?</button>`;
 
-  const button: HTMLButtonElement = document.querySelector("button")!;
+  const button: HTMLButtonElement = document.querySelector(".solve")!;
+  const copyButton: HTMLButtonElement = document.querySelector(".copy")!;
+
+  copyButton.addEventListener("click", async () => {
+    const { copyText } = await chrome.storage.local.get("copyText");
+    await navigator.clipboard.writeText(copyText);
+    copyButton.textContent = "Copied";
+  });
 
   button.addEventListener("click", async () => {
     if (tab.id === undefined) return;
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      world: "MAIN",
+      func: () => {
+        document.querySelectorAll<HTMLElement>(".ace_editor").forEach((el) => {
+          el.dataset.aceText = (el as any).env?.editor?.getValue() ?? "";
+        });
+      }
+    });
     await chrome.scripting.executeScript({
       target: { tabId: tab.id },
       files: ["out/build.js"]

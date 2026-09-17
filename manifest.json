@@ -1,5 +1,5 @@
 {
-  "name": "zyBook Solver",
+  "name": "zyBook Solver 2",
   "description": "Quickly solve zyBooks participation activities",
   "version": "1.0",
   "manifest_version": 3,
@@ -15,5 +15,5 @@
   "background": {
     "service_worker": "out/background.js"
   },
-  "permissions": ["activeTab", "scripting", "tabs"]
+  "permissions": ["activeTab", "scripting", "tabs", "clipboardWrite", "storage"]
 }

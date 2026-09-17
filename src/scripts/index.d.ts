@@ -1,5 +1,5 @@
 interface Task {
-  type: "short-answer" | "multiple-choice" | "animation-player" | "unknown";
+  type: "short-answer" | "multiple-choice" | "animation-player" | "code-writing" | "unknown";
   name: string;
   isRunning: boolean;
   isComplete: boolean;

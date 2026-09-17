@@ -1,6 +1,10 @@
 import { findAllNodes, findNode, delay, simulateTyping } from "./utils";
 import { Task } from ".";
 
+interface AceElement extends HTMLElement {
+  env?: { editor?: { getValue(): string } };
+}
+
 export async function handleShortAnswer(activity: Element): Promise<true> {
   const questions = findAllNodes<HTMLDivElement>(activity.childNodes, (node) => node.classList.contains("question-set-question"));
 
@@ -26,6 +30,33 @@ export async function handleShortAnswer(activity: Element): Promise<true> {
     await delay(100, () => simulateTyping(input, answer.textContent!));
     await delay(500, () => checkButton.click());
   }
+
+  return true;
+}
+export async function handleCodeWriting(activity: Element): Promise<true> {
+  let tag = "P";
+  let prompt = findNode<HTMLDivElement>(activity.childNodes, (node) => node.classList.contains("code-writing-prompt"));
+
+  if (!prompt) {
+    tag = "ZYINSTRUCTIONS";
+    prompt = findNode<HTMLDivElement>(activity.childNodes, (node) => node.classList.contains("activity-instructions"));
+  }
+  if (!prompt) return true;
+  const promptParas = findAllNodes<HTMLDivElement>(prompt.childNodes, (node) => node.tagName === tag);
+  let text = "Instructions for Coding question are as follows: \n";
+  for (const para of promptParas) {
+    text += (para.textContent ?? "") + "\n";
+  }
+  text += "\n\n The code for The question already in place is as follows:\n`";
+  const codeEditor = findNode<HTMLElement>(activity.childNodes, (node) => node.classList.contains("ace-editor"));
+  if (!codeEditor) {
+    alert("ASHJGDJHDSAGHJASD");
+    return true;
+  }
+  text += codeEditor.dataset.aceText ?? "";
+  text +=
+    "`\n\n Do not respond with anything except for the code that goes right below the `/* Your code goes here */`. Do not include any extra code just enough to get the desired result when added in that location";
+  chrome.storage.local.set({ copyText: text });
 
   return true;
 }

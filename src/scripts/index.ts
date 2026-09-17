@@ -1,8 +1,8 @@
-import { handleShortAnswer, handleMultipleChoice, handleAnimationPlayer, handleDefinitions } from "./handlers";
+import { handleShortAnswer, handleMultipleChoice, handleAnimationPlayer, handleDefinitions, handleCodeWriting } from "./handlers";
 import { findNode } from "./utils";
 
 export class Task {
-  type: "short-answer" | "multiple-choice" | "animation-player" | "definitions" | "unknown";
+  type: "short-answer" | "multiple-choice" | "animation-player" | "definitions" | "code-writing" | "unknown";
   name: string;
   isRunning: boolean;
   isComplete: boolean;
@@ -27,6 +27,7 @@ export class Task {
     if (activity.classList.contains("short-answer-content-resource")) return "short-answer";
     if (activity.classList.contains("multiple-choice-content-resource")) return "multiple-choice";
     if (activity.classList.contains("animation-player-content-resource")) return "animation-player";
+    if (activity.querySelector(".code-editor")) return "code-writing";
     if (activity.classList.contains("custom-content-resource")) {
       if (!!findNode(activity.childNodes, (node) => node.classList.contains("definition-match-payload"))) return "definitions";
     }
@@ -47,7 +48,8 @@ export class Task {
   };
   chrome.runtime.onMessage.addListener(onMessageListener);
 
-  const activities = Array.from(document.querySelectorAll(".participation")).filter((activity) => activity.classList.contains("interactive-activity-container"));
+  //const activities = Array.from(document.querySelectorAll(".participation")).filter((activity) => activity.classList.contains("interactive-activity-container"));
+  const activities = Array.from(document.querySelectorAll(".participation, .challenge")).filter((activity) => activity.classList.contains("interactive-activity-container"));
   for (const activity of activities) {
     const activityName = findNode<HTMLDivElement>(activity.childNodes, (node) => node.classList.contains("activity-title"))?.innerText;
     if (!activityName) continue;
@@ -64,5 +66,6 @@ export class Task {
     else if (task.type === "short-answer") task.completeTask(await handleShortAnswer(task.root));
     else if (task.type === "multiple-choice") task.completeTask(await handleMultipleChoice(task.root));
     else if (task.type === "definitions") task.completeTask(await handleDefinitions(task.root));
+    else if (task.type === "code-writing") task.completeTask(await handleCodeWriting(task.root));
   }
 })();
