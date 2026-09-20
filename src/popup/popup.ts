@@ -41,10 +41,12 @@ document.addEventListener("DOMContentLoaded", async () => {
   </header>
 
   <button class="solve">Solve!</button>
-  <button class="copy">Copy?</button>`;
+  <button class="copy">Copy?</button>
+  <button class="next">Next Section</button>`;
 
   const button: HTMLButtonElement = document.querySelector(".solve")!;
   const copyButton: HTMLButtonElement = document.querySelector(".copy")!;
+  const nextButton: HTMLButtonElement = document.querySelector(".next")!;
 
   copyButton.addEventListener("click", async () => {
     const { copyText } = await chrome.storage.local.get("copyText");
@@ -52,6 +54,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     copyButton.textContent = "Copied";
   });
 
+  nextButton.addEventListener("click", async () => {
+    if (tab.id === undefined) return;
+    await chrome.scripting.executeScript({
+      target: { tabId: tab.id },
+      func: async () => {
+        const el = document.querySelector<HTMLElement>(".section-nav.next");
+        const link = el?.querySelector<HTMLAnchorElement>("a");
+        if (!link) return;
+
+        await new Promise((resolve) => setTimeout(resolve, 100));
+        link.click();
+      }
+    });
+  });
   button.addEventListener("click", async () => {
     if (tab.id === undefined) return;
     await chrome.scripting.executeScript({

@@ -34,15 +34,12 @@ export async function handleShortAnswer(activity: Element): Promise<true> {
   return true;
 }
 export async function handleCodeWriting(activity: Element): Promise<true> {
-  let tag = "P";
+  let tags = ["P", "PRE", "ZYINSTRUCTIONS"];
   let prompt = findNode<HTMLDivElement>(activity.childNodes, (node) => node.classList.contains("code-writing-prompt"));
 
-  if (!prompt) {
-    tag = "ZYINSTRUCTIONS";
-    prompt = findNode<HTMLDivElement>(activity.childNodes, (node) => node.classList.contains("activity-instructions"));
-  }
+  if (!prompt) prompt = findNode<HTMLDivElement>(activity.childNodes, (node) => node.classList.contains("activity-instructions"));
   if (!prompt) return true;
-  const promptParas = findAllNodes<HTMLDivElement>(prompt.childNodes, (node) => node.tagName === tag);
+  const promptParas = findAllNodes<HTMLDivElement>(prompt.childNodes, (node) => tags.includes(node.tagName));
   let text = "Instructions for Coding question are as follows: \n";
   for (const para of promptParas) {
     text += (para.textContent ?? "") + "\n";
@@ -57,7 +54,11 @@ export async function handleCodeWriting(activity: Element): Promise<true> {
   text +=
     "`\n\n Do not respond with anything except for the code that goes right below the `/* Your code goes here */`. Do not include any extra code just enough to get the desired result when added in that location";
   chrome.storage.local.set({ copyText: text });
-
+  const startContainer = findNode<HTMLDivElement>(activity.childNodes, (node) => node.classList.contains("mb-4"));
+  if (!startContainer) return true;
+  const startButton = findNode<HTMLButtonElement>(startContainer.childNodes, (node) => node.classList.contains("primary"));
+  if (!startButton) return true;
+  await delay(100, () => startButton.click());
   return true;
 }
 
