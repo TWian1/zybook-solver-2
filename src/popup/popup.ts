@@ -104,24 +104,7 @@ document.addEventListener("DOMContentLoaded", async () => {
 
     const interval = setInterval(async () => {
       const results = await updateTasks(tab);
-      if (results.every((task) => !task.isRunning)) {
-        clearInterval(interval);
-        const { allParticipation } = await chrome.storage.local.get("allParticipation");
-        if (allParticipation === true) {
-          if (tab.id === undefined) return;
-          await chrome.scripting.executeScript({
-            target: { tabId: tab.id },
-            func: async () => {
-              const el = document.querySelector<HTMLElement>(".section-nav.next");
-              const link = el?.querySelector<HTMLAnchorElement>("a");
-              if (!link) return;
-
-              await new Promise((resolve) => setTimeout(resolve, 100));
-              link.click();
-            }
-          });
-        }
-      }
+      if (results.every((task) => !task.isRunning)) clearInterval(interval);
     }, 1000);
   });
 });
