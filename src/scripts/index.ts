@@ -37,7 +37,7 @@ export class Task {
 
 (async () => {
   const runningTasks: Task[] = [];
-
+  chrome.storage.local.set({ allParticipation: true });
   const onMessageListener = (message: any, _: any, sendResponse: (response?: any) => void) => {
     if (message.type === "clearTasks") {
       chrome.runtime.onMessage.removeListener(onMessageListener);
@@ -55,6 +55,7 @@ export class Task {
     if (!activityName) continue;
 
     const taskType = Task.getTaskType(activity);
+    if (taskType === "unknown" || taskType === "code-writing") chrome.storage.local.set({ allParticipation: false });
     if (taskType === "unknown") continue;
 
     const task = new Task(taskType, activityName, activity);
