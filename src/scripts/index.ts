@@ -62,10 +62,12 @@ export class Task {
   }
 
   for (const task of runningTasks) {
+    if (task.type === "code-writing") task.completeTask(await handleCodeWriting(task.root));
+  }
+  for (const task of runningTasks) {
     if (task.type === "animation-player") handleAnimationPlayer(task.root, task);
     else if (task.type === "short-answer") task.completeTask(await handleShortAnswer(task.root));
     else if (task.type === "multiple-choice") task.completeTask(await handleMultipleChoice(task.root));
     else if (task.type === "definitions") task.completeTask(await handleDefinitions(task.root));
-    else if (task.type === "code-writing") task.completeTask(await handleCodeWriting(task.root));
   }
 })();
